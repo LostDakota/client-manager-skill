@@ -2,6 +2,7 @@ import json
 import os
 import argparse
 import re
+import sys
 from datetime import datetime
 
 CLIENTS_FILE = "references/client_ids.json"
@@ -10,11 +11,16 @@ def _load_clients():
     """Loads client data from the JSON file."""
     if not os.path.exists(CLIENTS_FILE):
         return []
-    with open(CLIENTS_FILE, "r") as f:
-        return json.load(f)
+    try:
+        with open(CLIENTS_FILE, "r") as f:
+            return json.load(f)
+    except json.JSONDecodeError:
+        print(f"Warning: Client data file '{CLIENTS_FILE}' is malformed. Starting with empty client list.", file=sys.stderr)
+        return []
 
 def _save_clients(clients):
     """Saves client data to the JSON file."""
+    os.makedirs(os.path.dirname(CLIENTS_FILE), exist_ok=True)
     with open(CLIENTS_FILE, "w") as f:
         json.dump(clients, f, indent=2)
 
